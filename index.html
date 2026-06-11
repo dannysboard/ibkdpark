@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBK D-Park 디지털체험관</title>
+  <meta name="description" content="IBK기업은행 D-Park 웹 예약 시스템 - 미래 금융을 체험하세요" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    * { font-family: 'Noto Sans KR', sans-serif; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .fade-in { animation: fadeIn 0.35s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Hero SVG animations */
+    @keyframes hBlink1{0%,100%{opacity:.9}48%{opacity:.9}50%{opacity:.2}52%{opacity:.9}}
+    @keyframes hBlink2{0%,100%{opacity:.7}30%{opacity:.7}32%{opacity:.1}34%{opacity:.7}75%{opacity:.7}77%{opacity:.15}79%{opacity:.7}}
+    @keyframes hBlink3{0%,100%{opacity:.8}60%{opacity:.8}63%{opacity:0}66%{opacity:.8}}
+    @keyframes hScan{0%{transform:translateY(-40px);opacity:0}5%{opacity:.35}95%{opacity:.35}100%{transform:translateY(680px);opacity:0}}
+    @keyframes hFloat1{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes hShipFly{0%{transform:translateX(-60px) translateY(0)}100%{transform:translateX(1560px) translateY(-30px)}}
+    @keyframes hShipFly2{0%{transform:translateX(1560px)}100%{transform:translateX(-160px) translateY(20px)}}
+    @keyframes hDataStream{0%{stroke-dashoffset:200}100%{stroke-dashoffset:0}}
+    @keyframes hHoloPulse{0%,100%{opacity:.8}50%{opacity:.4}}
+    .hWin1{animation:hBlink1 4.3s infinite}
+    .hWin2{animation:hBlink2 6.1s infinite}
+    .hWin3{animation:hBlink3 5.7s infinite}
+    .hScanLine{animation:hScan 8s linear infinite}
+    .hRobotFloat{animation:hFloat1 4s ease-in-out infinite}
+    .hShip1{animation:hShipFly 22s linear infinite}
+    .hShip2{animation:hShipFly2 31s linear infinite}
+    .hDataLine{animation:hDataStream 2s linear infinite}
+    .hHolo{animation:hHoloPulse 3s ease-in-out infinite}
+
+    input:focus, select:focus { outline: none; border-color: #003087; box-shadow: 0 0 0 3px rgba(0,48,135,0.1); }
+    .btn-primary { background-color: #003087; color: white; transition: background-color 0.2s; }
+    .btn-primary:hover:not(:disabled) { background-color: #0050b3; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-gold { background-color: #c8a96e; color: #003087; transition: opacity 0.2s; }
+    .btn-gold:hover { opacity: 0.9; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #003087; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-white text-gray-900 min-h-screen flex flex-col">
+
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+<header class="sticky top-0 z-50 bg-[#003087] text-white shadow-md">
+  <nav class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+    <button onclick="navigate('home')" class="flex items-center gap-2">
+      <svg width="110" height="25" viewBox="0 0 110 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="IBK기업은행 로고">
+        <rect width="24" height="24" rx="3" fill="#c8a96e"/>
+        <text x="12" y="17" text-anchor="middle" fill="#003087" font-size="9" font-weight="900" font-family="Arial,sans-serif">IBK</text>
+        <text x="32" y="17" fill="white" font-size="12" font-weight="700" font-family="Arial,sans-serif">기업은행</text>
+      </svg>
+      <span class="font-bold text-lg tracking-tight">D-Park</span>
+    </button>
+    <ul class="flex items-center gap-1 sm:gap-4 text-sm font-medium">
+      <li class="hidden sm:block"><button onclick="navigate('guide')" class="hover:text-[#c8a96e] transition-colors px-1">체험안내</button></li>
+      <li class="hidden sm:block"><button onclick="navigate('zones')" class="hover:text-[#c8a96e] transition-colors px-1">체험존</button></li>
+      <li>
+        <a href="https://booking.kakao.com/detail/ticketStore/290198" target="_blank" rel="noopener noreferrer"
+           class="btn-gold px-4 py-1.5 rounded-full font-bold hover:opacity-90 transition-opacity text-sm">
+          예약하기
+        </a>
+      </li>
+      <li><button onclick="navigate('lookup')" class="hover:text-[#c8a96e] transition-colors px-1">예약조회</button></li>
+      <li class="hidden sm:block"><button onclick="navigate('admin')" class="hover:text-[#c8a96e] transition-colors px-1">관리자</button></li>
+    </ul>
+  </nav>
+</header>
+
+<main class="flex-1">
+
+<!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
+<div id="page-home" class="page active fade-in">
+
+  <!-- Hero Section: 네오하남 2047 애니메이션 -->
+  <section class="relative w-full overflow-hidden" aria-label="IBK D-Park 디지털체험관 히어로">
+    <div class="relative w-full" style="padding-bottom: min(44.4%, 640px); min-height: 340px;">
+      <svg viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid slice"
+           class="absolute inset-0 w-full h-full" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#000308"/>
+            <stop offset="35%" stop-color="#000C1F"/>
+            <stop offset="70%" stop-color="#001035"/>
+            <stop offset="100%" stop-color="#000A1C"/>
+          </linearGradient>
+          <radialGradient id="hHorizon" cx="50%" cy="80%" r="55%">
+            <stop offset="0%" stop-color="#0040CC" stop-opacity="0.6"/>
+            <stop offset="50%" stop-color="#001A66" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="hOrb" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#C8A96E" stop-opacity="0.7"/>
+            <stop offset="30%" stop-color="#8860A0" stop-opacity="0.35"/>
+            <stop offset="65%" stop-color="#0050FF" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="hRobotGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#00CFFF" stop-opacity="0.8"/>
+            <stop offset="60%" stop-color="#0050FF" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="hGridFloor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0050FF" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="hBlur3"><feGaussianBlur stdDeviation="3"/></filter>
+          <filter id="hBlur6"><feGaussianBlur stdDeviation="6"/></filter>
+          <filter id="hBlur12"><feGaussianBlur stdDeviation="12"/></filter>
+          <filter id="hGlow">
+            <feGaussianBlur stdDeviation="3" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="hGlowMd">
+            <feGaussianBlur stdDeviation="5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="hGlowLg">
+            <feGaussianBlur stdDeviation="9" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <clipPath id="hScene"><rect width="1440" height="640"/></clipPath>
+        </defs>
+
+        <!-- Sky -->
+        <rect width="1440" height="640" fill="url(#hSky)"/>
+        <rect width="1440" height="640" fill="url(#hHorizon)"/>
+
+        <!-- Stars -->
+        <g opacity="0.85">
+          <circle cx="88" cy="14" r="1.1" fill="white" opacity="0.7"/>
+          <circle cx="220" cy="28" r="0.8" fill="white" opacity="0.55"/>
+          <circle cx="370" cy="11" r="1.3" fill="white" opacity="0.85"/>
+          <circle cx="490" cy="38" r="0.7" fill="#C8D8FF" opacity="0.6"/>
+          <circle cx="630" cy="19" r="1.0" fill="white" opacity="0.7"/>
+          <circle cx="780" cy="44" r="0.8" fill="#C8A96E" opacity="0.7"/>
+          <circle cx="920" cy="15" r="1.2" fill="white" opacity="0.85"/>
+          <circle cx="1040" cy="36" r="0.7" fill="white" opacity="0.55"/>
+          <circle cx="1160" cy="22" r="1.0" fill="white" opacity="0.7"/>
+          <circle cx="1320" cy="48" r="0.9" fill="#C8D8FF" opacity="0.6"/>
+          <circle cx="55" cy="72" r="0.8" fill="white" opacity="0.55"/>
+          <circle cx="155" cy="88" r="1.0" fill="white" opacity="0.7"/>
+          <circle cx="295" cy="66" r="0.7" fill="white" opacity="0.55"/>
+          <circle cx="445" cy="96" r="0.9" fill="#C8A96E" opacity="0.65"/>
+          <circle cx="595" cy="71" r="0.8" fill="white" opacity="0.55"/>
+          <circle cx="720" cy="85" r="1.1" fill="white" opacity="0.7"/>
+          <circle cx="875" cy="62" r="0.8" fill="white" opacity="0.55"/>
+          <circle cx="1010" cy="82" r="0.7" fill="white" opacity="0.55"/>
+          <circle cx="1145" cy="70" r="0.9" fill="#C8D8FF" opacity="0.6"/>
+          <circle cx="1310" cy="90" r="0.8" fill="white" opacity="0.55"/>
+          <circle cx="175" cy="125" r="0.6" fill="white" opacity="0.55"/>
+          <circle cx="440" cy="138" r="0.8" fill="white" opacity="0.7"/>
+          <circle cx="680" cy="120" r="0.7" fill="white" opacity="0.55"/>
+          <circle cx="900" cy="112" r="0.9" fill="white" opacity="0.7"/>
+          <circle cx="1095" cy="132" r="0.6" fill="white" opacity="0.55"/>
+          <circle cx="1375" cy="118" r="0.8" fill="#C8A96E" opacity="0.65"/>
+        </g>
+
+        <!-- Horizon glow -->
+        <ellipse cx="720" cy="450" rx="680" ry="220" fill="url(#hHorizon)" filter="url(#hBlur12)"/>
+
+        <!-- Grid floor -->
+        <g clip-path="url(#hScene)" opacity="0.55">
+          <line x1="0" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="130" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="260" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="390" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="520" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="650" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="780" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="910" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="1040" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="1170" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="1300" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="1440" y1="640" x2="720" y2="310" stroke="#0050FF" stroke-width="0.5" opacity="0.5"/>
+          <line x1="0" y1="380" x2="1440" y2="380" stroke="#0050FF" stroke-width="0.4" opacity="0.25"/>
+          <line x1="0" y1="420" x2="1440" y2="420" stroke="#0050FF" stroke-width="0.4" opacity="0.3"/>
+          <line x1="0" y1="460" x2="1440" y2="460" stroke="#0050FF" stroke-width="0.4" opacity="0.35"/>
+          <line x1="0" y1="510" x2="1440" y2="510" stroke="#0050FF" stroke-width="0.4" opacity="0.4"/>
+          <line x1="0" y1="570" x2="1440" y2="570" stroke="#0050FF" stroke-width="0.4" opacity="0.45"/>
+          <line x1="0" y1="640" x2="1440" y2="640" stroke="#0050FF" stroke-width="0.4" opacity="0.5"/>
+        </g>
+        <rect x="0" y="490" width="1440" height="150" fill="url(#hGridFloor)" opacity="0.4"/>
+
+        <!-- Left city skyline -->
+        <g fill="#00060F">
+          <rect x="0" y="440" width="25" height="200"/>
+          <rect x="20" y="405" width="20" height="235"/>
+          <rect x="35" y="395" width="30" height="245"/>
+          <rect x="60" y="365" width="22" height="275"/>
+          <rect x="78" y="345" width="18" height="295"/>
+          <rect x="92" y="360" width="28" height="280"/>
+          <rect x="116" y="330" width="20" height="310"/>
+          <rect x="132" y="312" width="16" height="328"/>
+          <rect x="144" y="330" width="24" height="310"/>
+          <rect x="164" y="298" width="20" height="342"/>
+          <rect x="180" y="282" width="22" height="358"/>
+          <rect x="198" y="305" width="18" height="335"/>
+          <rect x="212" y="332" width="32" height="308"/>
+          <rect x="240" y="318" width="20" height="322"/>
+          <rect x="257" y="296" width="17" height="344"/>
+          <rect x="271" y="284" width="28" height="356"/>
+          <rect x="296" y="320" width="22" height="320"/>
+          <rect x="315" y="308" width="18" height="332"/>
+        </g>
+        <!-- Left building windows -->
+        <g filter="url(#hGlow)">
+          <rect x="65" y="370" width="18" height="3" fill="#0080FF" class="hWin2"/>
+          <rect x="134" y="318" width="14" height="3" fill="#C8A96E" class="hWin1"/>
+          <rect x="182" y="291" width="18" height="3" fill="#00CFFF" class="hWin3"/>
+          <rect x="273" y="292" width="24" height="3" fill="#C8A96E" class="hWin2"/>
+        </g>
+
+        <!-- Left tower (with holographic billboard) -->
+        <g fill="#00040C">
+          <rect x="328" y="248" width="58" height="392"/>
+          <rect x="346" y="218" width="22" height="422"/>
+          <rect x="356" y="190" width="8" height="450"/>
+        </g>
+        <g filter="url(#hGlowMd)">
+          <rect x="330" y="252" width="54" height="2.5" fill="#0080FF" opacity="0.8"/>
+          <rect x="330" y="262" width="54" height="1.5" fill="#C8A96E" opacity="0.6"/>
+        </g>
+        <rect x="330" y="270" width="54" height="35" fill="#000A1A" rx="1"/>
+        <g filter="url(#hGlow)" class="hHolo">
+          <text x="357" y="283" text-anchor="middle" fill="#00CFFF" font-size="5" font-family="monospace" opacity="0.9">MARKET LIVE</text>
+          <text x="357" y="292" text-anchor="middle" fill="#00FF88" font-size="5" font-family="monospace">↑ +2.4%</text>
+          <text x="357" y="300" text-anchor="middle" fill="#C8A96E" font-size="4.5" font-family="monospace">IBK INDEX</text>
+        </g>
+        <line x1="360" y1="152" x2="360" y2="190" stroke="#C8A96E" stroke-width="1.5" opacity="0.9" filter="url(#hGlow)"/>
+        <circle cx="360" cy="150" r="4" fill="#C8A96E" opacity="1" filter="url(#hGlowLg)"/>
+
+        <!-- Right city skyline -->
+        <g fill="#00040C">
+          <rect x="1095" y="395" width="28" height="245"/>
+          <rect x="1118" y="368" width="20" height="272"/>
+          <rect x="1134" y="342" width="26" height="298"/>
+          <rect x="1156" y="318" width="18" height="322"/>
+          <rect x="1170" y="300" width="22" height="340"/>
+          <rect x="1188" y="326" width="16" height="314"/>
+          <rect x="1200" y="344" width="28" height="296"/>
+          <rect x="1225" y="316" width="20" height="324"/>
+          <rect x="1241" y="298" width="17" height="342"/>
+          <rect x="1255" y="310" width="26" height="330"/>
+          <rect x="1278" y="352" width="18" height="288"/>
+          <rect x="1292" y="335" width="30" height="305"/>
+          <rect x="1320" y="365" width="22" height="275"/>
+          <rect x="1338" y="385" width="28" height="255"/>
+          <rect x="1364" y="408" width="38" height="232"/>
+          <rect x="1400" y="430" width="40" height="210"/>
+        </g>
+        <g filter="url(#hGlow)">
+          <rect x="1140" y="350" width="20" height="3" fill="#0080FF" class="hWin1"/>
+          <rect x="1173" y="308" width="18" height="3" fill="#C8A96E" class="hWin2"/>
+          <rect x="1244" y="306" width="14" height="3" fill="#00CFFF" class="hWin3"/>
+          <rect x="1295" y="343" width="26" height="3" fill="#C8A96E" class="hWin1"/>
+        </g>
+
+        <!-- Right tower -->
+        <g fill="#00040C">
+          <rect x="1054" y="256" width="58" height="384"/>
+          <rect x="1072" y="224" width="22" height="416"/>
+          <rect x="1082" y="196" width="8" height="444"/>
+        </g>
+        <g filter="url(#hGlowMd)">
+          <rect x="1056" y="260" width="54" height="2.5" fill="#0080FF" opacity="0.8"/>
+          <rect x="1056" y="270" width="54" height="1.5" fill="#C8A96E" opacity="0.6"/>
+        </g>
+        <rect x="1056" y="278" width="54" height="35" fill="#000A1A" rx="1"/>
+        <g filter="url(#hGlow)" class="hHolo">
+          <text x="1083" y="291" text-anchor="middle" fill="#FF44CC" font-size="5" font-family="monospace" opacity="0.9">IBK D-PARK</text>
+          <text x="1083" y="300" text-anchor="middle" fill="#C8A96E" font-size="5" font-family="monospace">체험 예약중</text>
+          <text x="1083" y="308" text-anchor="middle" fill="#00FF88" font-size="4.5" font-family="monospace">OPEN NOW</text>
+        </g>
+        <line x1="1082" y1="158" x2="1082" y2="196" stroke="#C8A96E" stroke-width="1.5" opacity="0.9" filter="url(#hGlow)"/>
+        <circle cx="1082" cy="156" r="4" fill="#C8A96E" opacity="1" filter="url(#hGlowLg)"/>
+
+        <!-- Central mega tower -->
+        <g fill="#000208">
+          <rect x="638" y="175" width="164" height="465"/>
+          <rect x="666" y="136" width="108" height="504"/>
+          <rect x="694" y="96" width="52" height="544"/>
+        </g>
+        <g stroke="#0050FF" stroke-width="0.45" opacity="0.4">
+          <line x1="658" y1="175" x2="658" y2="500"/>
+          <line x1="670" y1="175" x2="670" y2="500"/>
+          <line x1="682" y1="175" x2="682" y2="500"/>
+          <line x1="700" y1="136" x2="700" y2="500"/>
+          <line x1="712" y1="136" x2="712" y2="500"/>
+          <line x1="724" y1="96" x2="724" y2="500"/>
+          <line x1="736" y1="136" x2="736" y2="500"/>
+          <line x1="748" y1="136" x2="748" y2="500"/>
+          <line x1="760" y1="175" x2="760" y2="500"/>
+          <line x1="778" y1="175" x2="778" y2="500"/>
+          <line x1="790" y1="175" x2="790" y2="500"/>
+          <line x1="638" y1="196" x2="802" y2="196"/>
+          <line x1="638" y1="216" x2="802" y2="216"/>
+          <line x1="638" y1="236" x2="802" y2="236"/>
+          <line x1="638" y1="256" x2="802" y2="256"/>
+          <line x1="638" y1="276" x2="802" y2="276"/>
+          <line x1="638" y1="296" x2="802" y2="296"/>
+          <line x1="638" y1="316" x2="802" y2="316"/>
+          <line x1="638" y1="336" x2="802" y2="336"/>
+          <line x1="638" y1="356" x2="802" y2="356"/>
+          <line x1="638" y1="376" x2="802" y2="376"/>
+          <line x1="638" y1="396" x2="802" y2="396"/>
+          <line x1="638" y1="416" x2="802" y2="416"/>
+          <line x1="638" y1="436" x2="802" y2="436"/>
+          <line x1="638" y1="456" x2="802" y2="456"/>
+          <line x1="638" y1="476" x2="802" y2="476"/>
+        </g>
+        <!-- Tower top lights -->
+        <g filter="url(#hGlow)">
+          <rect x="646" y="184" width="8" height="5" fill="#0080FF" class="hWin1"/>
+          <rect x="658" y="184" width="8" height="5" fill="#0080FF" class="hWin2"/>
+          <rect x="670" y="184" width="8" height="5" fill="#C8A96E" class="hWin3"/>
+          <rect x="682" y="184" width="8" height="5" fill="#0080FF" class="hWin1"/>
+          <rect x="702" y="146" width="8" height="5" fill="#00CFFF" class="hWin2"/>
+          <rect x="714" y="146" width="8" height="5" fill="#0080FF" class="hWin3"/>
+          <rect x="714" y="110" width="8" height="5" fill="#C8A96E" class="hWin1"/>
+          <rect x="726" y="110" width="8" height="5" fill="#C8A96E" class="hWin2"/>
+          <rect x="726" y="146" width="8" height="5" fill="#0080FF" class="hWin3"/>
+          <rect x="738" y="146" width="8" height="5" fill="#00CFFF" class="hWin1"/>
+          <rect x="750" y="184" width="8" height="5" fill="#C8A96E" class="hWin2"/>
+          <rect x="762" y="184" width="8" height="5" fill="#0080FF" class="hWin3"/>
+          <rect x="778" y="184" width="8" height="5" fill="#0080FF" class="hWin1"/>
+          <rect x="646" y="204" width="8" height="5" fill="#C8A96E" class="hWin2"/>
+          <rect x="670" y="204" width="8" height="5" fill="#0080FF" class="hWin3"/>
+          <rect x="702" y="204" width="8" height="5" fill="#0080FF" class="hWin1"/>
+          <rect x="762" y="204" width="8" height="5" fill="#C8A96E" class="hWin2"/>
+          <rect x="714" y="204" width="8" height="5" fill="#00CFFF" class="hWin3"/>
+          <rect x="738" y="204" width="8" height="5" fill="#0080FF" class="hWin1"/>
+          <rect x="750" y="204" width="8" height="5" fill="#C8A96E" class="hWin2"/>
+        </g>
+        <!-- Tower accent lines -->
+        <g filter="url(#hGlowMd)">
+          <line x1="638" y1="175" x2="802" y2="175" stroke="#C8A96E" stroke-width="2" opacity="0.9"/>
+          <line x1="666" y1="136" x2="774" y2="136" stroke="#0080FF" stroke-width="1.5" opacity="0.8"/>
+          <line x1="694" y1="96" x2="746" y2="96" stroke="#00CFFF" stroke-width="1" opacity="0.7"/>
+        </g>
+        <!-- Tower spire -->
+        <line x1="720" y1="52" x2="720" y2="96" stroke="#C8A96E" stroke-width="2.5" opacity="1" filter="url(#hGlow)"/>
+        <ellipse cx="720" cy="50" rx="6" ry="6" fill="#C8A96E" opacity="1" filter="url(#hGlowLg)"/>
+        <ellipse cx="720" cy="50" rx="16" ry="16" fill="#C8A96E" opacity="0.25" filter="url(#hBlur12)"/>
+
+        <!-- Central holographic ticker -->
+        <rect x="648" y="240" width="144" height="90" fill="#000511" rx="2"/>
+        <rect x="650" y="242" width="140" height="86" fill="#000A22" rx="1"/>
+        <rect x="650" y="242" width="140" height="50" fill="#000B2A"/>
+        <ellipse cx="720" cy="265" rx="55" ry="22" fill="#0040CC" opacity="0.3" filter="url(#hBlur3)"/>
+        <g filter="url(#hGlowMd)" class="hHolo">
+          <text x="720" y="258" text-anchor="middle" fill="#00CFFF" font-size="8.5" font-family="monospace" font-weight="bold" opacity="0.95">IBK D-PARK</text>
+          <text x="720" y="270" text-anchor="middle" fill="#C8A96E" font-size="6.5" font-family="monospace">NEO HANAM 2047</text>
+          <text x="720" y="281" text-anchor="middle" fill="#00FF88" font-size="5.5" font-family="monospace">▶ 미래 금융 체험관</text>
+        </g>
+        <rect x="650" y="293" width="140" height="12" fill="#001A40"/>
+        <rect x="650" y="293" width="140" height="1" fill="#0080FF" opacity="0.8"/>
+        <g filter="url(#hGlow)">
+          <text x="720" y="302" text-anchor="middle" fill="#00CFFF" font-size="4.5" font-family="monospace" opacity="0.85">IBK +2.4%  ·  KOSPI 3,248  ·  USD 1,342  ·  체험예약 OPEN</text>
+        </g>
+
+        <!-- Orb & orbit ring -->
+        <ellipse cx="720" cy="308" rx="185" ry="118" fill="url(#hOrb)" filter="url(#hBlur12)"/>
+        <ellipse cx="720" cy="308" rx="260" ry="88" fill="none" stroke="#0080FF" stroke-width="0.9" opacity="0.4" stroke-dasharray="10,4"/>
+        <ellipse cx="720" cy="308" rx="310" ry="108" fill="none" stroke="#C8A96E" stroke-width="0.6" opacity="0.25" stroke-dasharray="4,9"/>
+
+        <!-- AI Robot (floating) -->
+        <g class="hRobotFloat" filter="url(#hGlowMd)">
+          <ellipse cx="720" cy="420" rx="55" ry="80" fill="url(#hRobotGlow)" filter="url(#hBlur6)" opacity="0.6"/>
+          <!-- Legs -->
+          <rect x="706" y="470" width="11" height="38" fill="#0A1A30" rx="3"/>
+          <rect x="723" y="470" width="11" height="38" fill="#0A1A30" rx="3"/>
+          <rect x="703" y="500" width="17" height="8" fill="#0B2040" rx="2"/>
+          <rect x="720" y="500" width="17" height="8" fill="#0B2040" rx="2"/>
+          <!-- Torso -->
+          <rect x="700" y="400" width="40" height="72" fill="#081828" rx="5"/>
+          <rect x="702" y="402" width="36" height="68" fill="#0A2038" rx="4"/>
+          <rect x="707" y="410" width="26" height="30" fill="#000C1F" rx="2"/>
+          <ellipse cx="720" cy="425" rx="10" ry="10" fill="#0050FF" opacity="0.3"/>
+          <ellipse cx="720" cy="425" rx="6" ry="6" fill="#00CFFF" opacity="0.6"/>
+          <text x="720" y="440" text-anchor="middle" fill="#C8A96E" font-size="5" font-family="monospace" font-weight="bold" opacity="0.9">IBK</text>
+          <!-- Arms -->
+          <rect x="678" y="405" width="22" height="48" fill="#0A1A30" rx="8"/>
+          <rect x="740" y="405" width="22" height="48" fill="#0A1A30" rx="8"/>
+          <ellipse cx="689" cy="460" rx="10" ry="7" fill="#001530"/>
+          <ellipse cx="751" cy="460" rx="10" ry="7" fill="#001530"/>
+          <ellipse cx="689" cy="458" rx="6" ry="4" fill="#00CFFF" opacity="0.5" filter="url(#hBlur3)"/>
+          <ellipse cx="751" cy="458" rx="6" ry="4" fill="#C8A96E" opacity="0.5" filter="url(#hBlur3)"/>
+          <!-- Neck -->
+          <rect x="714" y="390" width="12" height="12" fill="#08182C" rx="3"/>
+          <!-- Head -->
+          <rect x="702" y="355" width="36" height="38" fill="#081828" rx="7"/>
+          <rect x="704" y="357" width="32" height="34" fill="#0C2040" rx="6"/>
+          <rect x="706" y="365" width="28" height="12" fill="#000C1F" rx="3"/>
+          <ellipse cx="720" cy="371" rx="11" ry="4" fill="#00CFFF" opacity="0.5" filter="url(#hBlur3)"/>
+          <!-- Antenna -->
+          <line x1="720" y1="340" x2="720" y2="357" stroke="#C8A96E" stroke-width="1.5" opacity="0.9"/>
+          <circle cx="720" cy="338" r="3" fill="#C8A96E" opacity="1" filter="url(#hGlow)"/>
+        </g>
+
+        <!-- Holographic chart panel -->
+        <g class="hHolo" style="transform-origin:751px 440px">
+          <rect x="760" y="395" width="90" height="65" fill="#000B20" opacity="0.85" rx="4"/>
+          <rect x="761" y="396" width="88" height="63" fill="none" stroke="#0080FF" stroke-width="0.8" rx="3" opacity="0.7"/>
+          <g filter="url(#hGlow)">
+            <rect x="768" y="435" width="7" height="15" fill="#0080FF" opacity="0.8"/>
+            <rect x="778" y="425" width="7" height="25" fill="#00CFFF" opacity="0.8"/>
+            <rect x="788" y="418" width="7" height="32" fill="#0080FF" opacity="0.8"/>
+            <rect x="798" y="428" width="7" height="22" fill="#00FF88" opacity="0.8"/>
+            <rect x="808" y="415" width="7" height="35" fill="#0080FF" opacity="0.8"/>
+            <rect x="818" y="410" width="7" height="40" fill="#00CFFF" opacity="0.9"/>
+            <rect x="828" y="420" width="7" height="30" fill="#00FF88" opacity="0.8"/>
+          </g>
+          <text x="805" y="405" text-anchor="middle" fill="#C8A96E" font-size="5" font-family="monospace" opacity="0.9">PORTFOLIO</text>
+          <text x="805" y="412" text-anchor="middle" fill="#00FF88" font-size="4.5" font-family="monospace">▲ +12.4%</text>
+        </g>
+
+        <!-- Spacecraft 1 -->
+        <g class="hShip1" style="transform-origin:0 0">
+          <g transform="translate(80,220)">
+            <ellipse cx="0" cy="0" rx="45" ry="10" fill="#0A1830"/>
+            <ellipse cx="0" cy="-2" rx="42" ry="8" fill="#0C2040"/>
+            <ellipse cx="20" cy="-4" rx="12" ry="6" fill="#001A3D"/>
+            <ellipse cx="22" cy="-5" rx="8" ry="4" fill="#00CFFF" opacity="0.4"/>
+            <ellipse cx="-30" cy="-6" rx="10" ry="5" fill="#081420"/>
+            <ellipse cx="-30" cy="6" rx="10" ry="5" fill="#081420"/>
+            <ellipse cx="-42" cy="-6" rx="6" ry="3" fill="#0080FF" opacity="0.9" filter="url(#hBlur3)"/>
+            <ellipse cx="-42" cy="6" rx="6" ry="3" fill="#0080FF" opacity="0.9" filter="url(#hBlur3)"/>
+            <line x1="-45" y1="-6" x2="-110" y2="-8" stroke="#0080FF" stroke-width="2" opacity="0.5" filter="url(#hBlur3)"/>
+            <line x1="-45" y1="6" x2="-110" y2="8" stroke="#0080FF" stroke-width="2" opacity="0.5" filter="url(#hBlur3)"/>
+            <circle cx="15" cy="-8" r="1.5" fill="#FF4488" opacity="0.9" filter="url(#hGlow)"/>
+          </g>
+        </g>
+
+        <!-- Spacecraft 2 -->
+        <g class="hShip2">
+          <g transform="translate(1360,160) scale(-1,1)">
+            <ellipse cx="0" cy="0" rx="28" ry="7" fill="#0A1020"/>
+            <ellipse cx="14" cy="-3" rx="8" ry="4" fill="#001830"/>
+            <ellipse cx="16" cy="-4" rx="5" ry="3" fill="#C8A96E" opacity="0.4"/>
+            <ellipse cx="-18" cy="-4" rx="7" ry="3" fill="#060E18"/>
+            <ellipse cx="-18" cy="4" rx="7" ry="3" fill="#060E18"/>
+            <ellipse cx="-27" cy="-4" rx="4" ry="2" fill="#C8A96E" opacity="0.85" filter="url(#hBlur3)"/>
+            <ellipse cx="-27" cy="4" rx="4" ry="2" fill="#C8A96E" opacity="0.85" filter="url(#hBlur3)"/>
+            <line x1="-28" y1="-4" x2="-70" y2="-5" stroke="#C8A96E" stroke-width="1.5" opacity="0.45" filter="url(#hBlur3)"/>
+            <line x1="-28" y1="4" x2="-70" y2="5" stroke="#C8A96E" stroke-width="1.5" opacity="0.45" filter="url(#hBlur3)"/>
+          </g>
+        </g>
+
+        <!-- Data streams -->
+        <g opacity="0.6">
+          <line x1="420" y1="308" x2="590" y2="308" stroke="#0080FF" stroke-width="1.2" stroke-dasharray="8,4" class="hDataLine"/>
+          <line x1="850" y1="308" x2="1020" y2="308" stroke="#0080FF" stroke-width="1.2" stroke-dasharray="8,4" class="hDataLine"/>
+        </g>
+
+        <!-- Scan line -->
+        <rect x="0" y="0" width="1440" height="3" fill="#00CFFF" opacity="0.12" class="hScanLine" style="filter:blur(2px)"/>
+      </svg>
+
+      <!-- Gradient overlay -->
+      <div class="absolute inset-0" style="background:linear-gradient(to bottom, rgba(0,20,60,0.25) 0%, rgba(0,20,60,0.08) 40%, rgba(0,15,50,0.72) 100%);" aria-hidden="true"></div>
+
+      <!-- Hero text content -->
+      <div class="absolute inset-0 flex flex-col justify-end px-5 pb-8 md:px-10 md:pb-12 lg:px-20 lg:pb-16">
+        <p class="text-xs md:text-sm font-semibold text-[#c8a96e] tracking-widest uppercase mb-2">
+          IBK기업은행 디지털체험관
+        </p>
+        <h1 class="text-2xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-3 max-w-xl lg:max-w-2xl">
+          미래 금융을 <br class="hidden sm:block" />
+          <span class="text-[#c8a96e]">직접 체험</span>하세요
+        </h1>
+        <p class="text-sm md:text-base text-white/80 mb-6 max-w-md leading-relaxed">
+          네오하남 2047에서 나만의 금융 유형을 발견하고
+          맞춤형 IBK 금융 솔루션을 경험하세요.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="https://booking.kakao.com/detail/ticketStore/290198" target="_blank" rel="noopener noreferrer"
+             class="px-7 py-3.5 rounded-2xl font-bold text-sm text-[#003087] bg-[#c8a96e] hover:opacity-90 active:scale-95 transition-all shadow-lg inline-block text-center">
+            지금 예약하기 →
+          </a>
+          <button onclick="navigate('guide')"
+             class="px-7 py-3.5 rounded-2xl font-semibold text-sm text-white/90 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 transition-all">
+            체험 안내 보기
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom fade -->
+      <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- Stats bar -->
+  <section class="bg-[#f8f9ff] py-12 px-4 border-b">
+    <div class="max-w-5xl mx-auto grid grid-cols-3 gap-8 text-center">
+      <div><p class="text-3xl font-extrabold text-[#003087]">6개</p><p class="text-gray-500 text-sm mt-1">체험존</p></div>
+      <div><p class="text-3xl font-extrabold text-[#003087]">50분</p><p class="text-gray-500 text-sm mt-1">평균 체험 시간</p></div>
+      <div><p class="text-3xl font-extrabold text-[#003087]">AI</p><p class="text-gray-500 text-sm mt-1">개인화 피드백</p></div>
+    </div>
+  </section>
+
+  <!-- 6 Experience Zones -->
+  <section class="py-20 px-4 max-w-5xl mx-auto w-full">
+    <div class="text-center mb-12">
+      <p class="text-[#c8a96e] font-semibold text-sm uppercase tracking-widest mb-3">Experience Zones</p>
+      <h2 class="text-3xl font-extrabold text-[#003087] mb-3">6개의 체험존</h2>
+      <p class="text-gray-600">각 존에서 다양한 금융 체험을 통해 나만의 아바타를 성장시키세요</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <button onclick="navigate('zones')" class="bg-white border border-gray-100 rounded-2xl p-6 text-left hover:shadow-lg hover:border-[#003087] transition-all group">
+        <div class="text-4xl mb-3">⚖️</div>
+        <h3 class="font-bold text-[#003087] mb-1 group-hover:text-[#0050b3]">밸런스런</h3>
+        <p class="text-sm text-gray-500">자산 균형 감각 테스트</p>
+      </button>
+      <button onclick="navigate('zones')" class="bg-white border border-gray-100 rounded-2xl p-6 text-left hover:shadow-lg hover:border-[#003087] transition-all group">
+        <div class="text-4xl mb-3">🛡️</div>
+        <h3 class="font-bold text-[#003087] mb-1 group-hover:text-[#0050b3]">더 가디언즈</h3>
+        <p class="text-sm text-gray-500">금융 보안 미션</p>
+      </button>
+      <button onclick="navigate('zones')" class="bg-white border border-gray-100 rounded-2xl p-6 text-left hover:shadow-lg hover:border-[#003087] transition-all group">
+        <div class="text-4xl mb-3">🔍</div>
+        <h3 class="font-bold text-[#003087] mb-1 group-hover:text-[#0050b3]">페이크X</h3>
+        <p class="text-sm text-gray-500">금융 사기 탐지 체험</p>
+      </button>
+      <button onclick="navigate('zones')" class="bg-white border border-gray-100 rounded-2xl p-6 text-left hover:shadow-lg hover:border-[#003087] transition-all group">
+        <div class="text-4xl mb-3">🎯</div>
+        <h3 class="font-bold text-[#003087] mb-1 group-hover:text-[#0050b3]">에셋슈팅</h3>
+        <p class="text-sm text-gray-500">자산 포트폴리오 게임</p>
+      </button>
+      <button onclick="navigate('zones')" class="bg-white border border-gray-100 rounded-2xl p-6 text-left hover:shadow-lg hover:border-[#003087] transition-all group">
+        <div class="text-4xl mb-3">🌆</div>
+        <h3 class="font-bold text-[#003087] mb-1 group-hover:text-[#0050b3]">어반라운지</h3>
+        <p class="text-sm text-gray-500">도시형 금융 라이프스타일</p>
+      </button>
+      <button onclick="navigate('zones')" class="bg-white border border-gray-100 rounded-2xl p-6 text-left hover:shadow-lg hover:border-[#003087] transition-all group">
+        <div class="text-4xl mb-3">✨</div>
+        <h3 class="font-bold text-[#003087] mb-1 group-hover:text-[#0050b3]">X조우</h3>
+        <p class="text-sm text-gray-500">AI 금융 피날레 체험</p>
+      </button>
+    </div>
+    <div class="text-center mt-8">
+      <button onclick="navigate('zones')" class="text-[#003087] font-semibold hover:underline">모든 체험존 자세히 보기 →</button>
+    </div>
+  </section>
+
+  <!-- 금융 유형 -->
+  <section class="bg-[#f8f9ff] py-20 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-extrabold text-[#003087] mb-3">나의 금융 유형은?</h2>
+        <p class="text-gray-500">체험을 통해 당신만의 금융 성향을 발견하세요</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="bg-white rounded-2xl p-8 text-center shadow-sm border border-[#e8ecf8]">
+          <div class="text-5xl mb-4">🏦</div>
+          <h3 class="text-xl font-extrabold text-[#003087] mb-2">안정형</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">원금 보존을 최우선으로 하는 안전한 투자자. 예금·적금 중심의 포트폴리오를 선호합니다.</p>
+        </div>
+        <div class="bg-[#003087] text-white rounded-2xl p-8 text-center shadow-lg ring-2 ring-[#c8a96e]/40">
+          <div class="text-5xl mb-4">⚖️</div>
+          <h3 class="text-xl font-extrabold text-[#c8a96e] mb-2">균형형</h3>
+          <p class="text-sm text-blue-200 leading-relaxed">안정과 성장을 균형 있게 추구하는 합리적 투자자. 다양한 자산 배분을 통해 리스크를 분산합니다.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-8 text-center shadow-sm border border-[#e8ecf8]">
+          <div class="text-5xl mb-4">🚀</div>
+          <h3 class="text-xl font-extrabold text-[#003087] mb-2">성장형</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">적극적인 자산 성장을 추구하는 도전적 투자자. 주식·펀드 중심의 공격적 포트폴리오를 선호합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="bg-[#003087] text-white py-20 px-4">
+    <div class="max-w-5xl mx-auto text-center">
+      <h2 class="text-3xl font-extrabold mb-4">지금 바로 예약하세요</h2>
+      <p class="text-blue-200 mb-10 max-w-lg mx-auto">카카오 예약을 통해 간편하게 체험존 방문을 예약할 수 있습니다.</p>
+      <a href="https://booking.kakao.com/detail/ticketStore/290198" target="_blank" rel="noopener noreferrer"
+         class="px-10 py-4 bg-[#c8a96e] text-[#003087] font-extrabold rounded-xl text-lg hover:opacity-90 transition-opacity shadow-xl inline-block">
+        카카오 예약하기 →
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-[#003087] text-white py-8 border-t border-[#002070]">
+    <div class="max-w-5xl mx-auto px-4 text-center text-sm text-blue-200">
+      <p class="font-semibold text-white mb-1">IBK D-Park 디지털체험관</p>
+      <p>IBK기업은행 본점 D-Park (서울특별시 중구 을지로 79)</p>
+      <p class="mt-2">ⓒ 2026 IBK기업은행. All rights reserved.</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════ GUIDE ═══════════════════════════════ -->
+<div id="page-guide" class="page fade-in">
+  <div class="max-w-5xl mx-auto px-4 py-16">
+    <div class="text-center mb-14">
+      <p class="text-[#c8a96e] font-semibold text-sm uppercase tracking-widest mb-3">Experience Guide</p>
+      <h1 class="text-4xl font-bold text-[#003087] mb-4">체험 안내</h1>
+      <p class="text-gray-600 text-lg max-w-2xl mx-auto">IBK D-Park에서 진행되는 그룹 체험 프로그램을 소개합니다. 금융의 미래를 직접 경험해보세요.</p>
+    </div>
+
+    <!-- Program Overview -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-[#003087] mb-6 border-b-2 border-[#c8a96e] pb-2 inline-block">프로그램 개요</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="flex items-center gap-4 p-4 bg-[#f8f9ff] rounded-xl"><span class="text-[#003087] font-bold min-w-24 text-sm">체험 시간</span><span class="text-gray-700">약 50~60분</span></div>
+        <div class="flex items-center gap-4 p-4 bg-[#f8f9ff] rounded-xl"><span class="text-[#003087] font-bold min-w-24 text-sm">참여 인원</span><span class="text-gray-700">1~20명 (그룹 세션)</span></div>
+        <div class="flex items-center gap-4 p-4 bg-[#f8f9ff] rounded-xl"><span class="text-[#003087] font-bold min-w-24 text-sm">운영 시간</span><span class="text-gray-700">평일 10:00 ~ 17:00</span></div>
+        <div class="flex items-center gap-4 p-4 bg-[#f8f9ff] rounded-xl"><span class="text-[#003087] font-bold min-w-24 text-sm">예약 방법</span><span class="text-gray-700">카카오 온라인 사전 예약</span></div>
+        <div class="flex items-center gap-4 p-4 bg-[#f8f9ff] rounded-xl"><span class="text-[#003087] font-bold min-w-24 text-sm">체험 비용</span><span class="text-gray-700">무료</span></div>
+        <div class="flex items-center gap-4 p-4 bg-[#f8f9ff] rounded-xl"><span class="text-[#003087] font-bold min-w-24 text-sm">위치</span><span class="text-gray-700">IBK기업은행 본점 D-Park</span></div>
+      </div>
+    </section>
+
+    <!-- Journey -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-[#003087] mb-6 border-b-2 border-[#c8a96e] pb-2 inline-block">체험 여정</h2>
+      <div class="space-y-6">
+        <div class="flex gap-6 items-start">
+          <div class="w-12 h-12 rounded-full bg-[#003087] text-white flex items-center justify-center text-xl flex-shrink-0">📅</div>
+          <div class="flex-1 bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-2"><span class="text-xs font-bold text-[#c8a96e] bg-[#c8a96e]/10 px-2 py-0.5 rounded-full">STEP 1</span><h3 class="font-bold text-[#003087]">카카오 예약</h3></div>
+            <p class="text-gray-600 text-sm leading-relaxed">카카오 예약 시스템으로 날짜·시간·참여 인원을 선택하고 방문을 예약합니다.</p>
+          </div>
+        </div>
+        <div class="flex gap-6 items-start">
+          <div class="w-12 h-12 rounded-full bg-[#003087] text-white flex items-center justify-center text-xl flex-shrink-0">✅</div>
+          <div class="flex-1 bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-2"><span class="text-xs font-bold text-[#c8a96e] bg-[#c8a96e]/10 px-2 py-0.5 rounded-full">STEP 2</span><h3 class="font-bold text-[#003087]">현장 체크인</h3></div>
+            <p class="text-gray-600 text-sm leading-relaxed">예약번호 또는 QR코드로 현장에서 체크인합니다. 키오스크에서 아바타를 생성합니다.</p>
+          </div>
+        </div>
+        <div class="flex gap-6 items-start">
+          <div class="w-12 h-12 rounded-full bg-[#003087] text-white flex items-center justify-center text-xl flex-shrink-0">🎮</div>
+          <div class="flex-1 bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-2"><span class="text-xs font-bold text-[#c8a96e] bg-[#c8a96e]/10 px-2 py-0.5 rounded-full">STEP 3</span><h3 class="font-bold text-[#003087]">체험존 순회</h3></div>
+            <p class="text-gray-600 text-sm leading-relaxed">6개의 체험존을 자유롭게 돌아다니며 미션을 수행하고 점수를 누적합니다.</p>
+          </div>
+        </div>
+        <div class="flex gap-6 items-start">
+          <div class="w-12 h-12 rounded-full bg-[#003087] text-white flex items-center justify-center text-xl flex-shrink-0">✨</div>
+          <div class="flex-1 bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-2"><span class="text-xs font-bold text-[#c8a96e] bg-[#c8a96e]/10 px-2 py-0.5 rounded-full">STEP 4</span><h3 class="font-bold text-[#003087]">피날레 (X조우)</h3></div>
+            <p class="text-gray-600 text-sm leading-relaxed">모든 체험이 끝나면 AI가 분석한 나만의 금융 성향과 결과를 확인합니다.</p>
+          </div>
+        </div>
+        <div class="flex gap-6 items-start">
+          <div class="w-12 h-12 rounded-full bg-[#003087] text-white flex items-center justify-center text-xl flex-shrink-0">📊</div>
+          <div class="flex-1 bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-2"><span class="text-xs font-bold text-[#c8a96e] bg-[#c8a96e]/10 px-2 py-0.5 rounded-full">STEP 5</span><h3 class="font-bold text-[#003087]">결과 조회</h3></div>
+            <p class="text-gray-600 text-sm leading-relaxed">체험 후 웹에서 예약번호로 개인화된 피드백과 결과를 언제든 조회하세요.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notices -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-[#003087] mb-6 border-b-2 border-[#c8a96e] pb-2 inline-block">유의사항</h2>
+      <ul class="space-y-3 text-gray-600">
+        <li class="flex gap-2 items-start"><span class="text-[#c8a96e] mt-0.5">•</span><span>예약 후 무단 취소/불참 시 향후 이용이 제한될 수 있습니다.</span></li>
+        <li class="flex gap-2 items-start"><span class="text-[#c8a96e] mt-0.5">•</span><span>체험 시작 10분 전까지 현장 도착 및 체크인을 완료해주세요.</span></li>
+        <li class="flex gap-2 items-start"><span class="text-[#c8a96e] mt-0.5">•</span><span>만 14세 미만은 보호자 동반이 필요합니다.</span></li>
+        <li class="flex gap-2 items-start"><span class="text-[#c8a96e] mt-0.5">•</span><span>체험 중 촬영된 이미지는 서비스 개선 목적으로만 활용됩니다.</span></li>
+        <li class="flex gap-2 items-start"><span class="text-[#c8a96e] mt-0.5">•</span><span>예약 변경은 체험일 하루 전까지 가능합니다.</span></li>
+      </ul>
+    </section>
+
+    <div class="text-center">
+      <a href="https://booking.kakao.com/detail/ticketStore/290198" target="_blank" rel="noopener noreferrer"
+         class="bg-[#003087] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#0050b3] transition-colors inline-block">
+        지금 예약하기
+      </a>
+    </div>
+  </div>
+
+  <footer class="bg-[#003087] text-white py-8 mt-12">
+    <div class="max-w-5xl mx-auto px-4 text-center text-sm text-blue-200">
+      <p class="font-semibold text-white mb-1">IBK D-Park 디지털체험관</p>
+      <p>서울특별시 중구 을지로 79 IBK기업은행 본점</p>
+      <p class="mt-2">ⓒ 2026 IBK기업은행. All rights reserved.</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════ ZONES ═══════════════════════════════ -->
+<div id="page-zones" class="page fade-in">
+  <div class="max-w-5xl mx-auto px-4 py-16">
+    <div class="text-center mb-14">
+      <p class="text-[#c8a96e] font-semibold text-sm uppercase tracking-widest mb-3">Experience Zones</p>
+      <h1 class="text-4xl font-bold text-[#003087] mb-4">체험존 소개</h1>
+      <p class="text-gray-600 text-lg max-w-2xl mx-auto">6개의 체험존에서 다양한 금융 미션을 수행하며 나만의 금융 아바타를 성장시켜보세요.</p>
+    </div>
+    <div class="space-y-8">
+      <div class="rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-700 p-8 text-white"><div class="flex items-center gap-4 mb-3"><span class="text-5xl">⚖️</span><div><h2 class="text-2xl font-bold">밸런스런</h2><p class="text-white/80 text-sm">자산 균형 감각을 테스트하세요</p></div></div></div>
+        <div class="p-6 bg-white"><p class="text-gray-700 leading-relaxed mb-4">위험과 수익의 균형을 맞추는 인터랙티브 게임입니다. 다양한 자산군의 특성을 이해하고 최적의 포트폴리오를 구성해보세요.</p><div class="flex flex-wrap gap-2"><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">자산 배분 시뮬레이션</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">리스크/리턴 분석</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">실시간 스코어링</span></div></div>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+        <div class="bg-gradient-to-r from-indigo-500 to-indigo-700 p-8 text-white"><div class="flex items-center gap-4 mb-3"><span class="text-5xl">🛡️</span><div><h2 class="text-2xl font-bold">더 가디언즈</h2><p class="text-white/80 text-sm">금융 보안 미션에 도전하세요</p></div></div></div>
+        <div class="p-6 bg-white"><p class="text-gray-700 leading-relaxed mb-4">금융 사이버 보안의 최전선에서 디지털 자산을 지키는 가디언이 되어보세요. 실제 위협 시나리오를 기반으로 한 미션들을 수행합니다.</p><div class="flex flex-wrap gap-2"><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">보안 위협 탐지</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">암호화폐 자산 보호</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">팀워크 미션</span></div></div>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+        <div class="bg-gradient-to-r from-purple-500 to-purple-700 p-8 text-white"><div class="flex items-center gap-4 mb-3"><span class="text-5xl">🔍</span><div><h2 class="text-2xl font-bold">페이크X</h2><p class="text-white/80 text-sm">금융 사기를 찾아내세요</p></div></div></div>
+        <div class="p-6 bg-white"><p class="text-gray-700 leading-relaxed mb-4">날로 진화하는 금융 사기 수법을 직접 체험하고 탐지 능력을 키웁니다. 실제 사례를 기반으로 한 시뮬레이션으로 금융 사기 예방 감각을 높이세요.</p><div class="flex flex-wrap gap-2"><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">딥페이크 탐지</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">피싱 시뮬레이션</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">사기 유형 학습</span></div></div>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+        <div class="bg-gradient-to-r from-green-500 to-green-700 p-8 text-white"><div class="flex items-center gap-4 mb-3"><span class="text-5xl">🎯</span><div><h2 class="text-2xl font-bold">에셋슈팅</h2><p class="text-white/80 text-sm">자산 포트폴리오 게임</p></div></div></div>
+        <div class="p-6 bg-white"><p class="text-gray-700 leading-relaxed mb-4">실시간 시장 데이터를 활용한 자산 투자 게임입니다. 주식, 채권, 부동산 등 다양한 자산에 투자하며 최고의 수익률을 달성해보세요.</p><div class="flex flex-wrap gap-2"><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">실시간 자산 투자</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">시장 변동 대응</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">수익률 경쟁</span></div></div>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+        <div class="bg-gradient-to-r from-orange-500 to-orange-700 p-8 text-white"><div class="flex items-center gap-4 mb-3"><span class="text-5xl">🌆</span><div><h2 class="text-2xl font-bold">어반라운지</h2><p class="text-white/80 text-sm">도시형 금융 라이프스타일</p></div></div></div>
+        <div class="p-6 bg-white"><p class="text-gray-700 leading-relaxed mb-4">미래 도시에서의 디지털 금융 생활을 체험합니다. 간편결제, 마이데이터, 생활 금융 서비스를 직접 사용하며 미래 금융을 경험하세요.</p><div class="flex flex-wrap gap-2"><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">디지털 결제 체험</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">마이데이터 활용</span><span class="text-xs bg-[#f0f4ff] text-[#003087] px-3 py-1.5 rounded-full font-medium">생활 금융 서비스</span></div></div>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-lg bg-gradient-to-r from-[#001d52] to-[#003087] text-white">
+        <div class="p-8"><div class="flex items-center gap-4 mb-3"><span class="text-5xl">✨</span><div><h2 class="text-2xl font-bold text-[#c8a96e]">X조우</h2><p class="text-blue-200 text-sm">AI 금융 피날레</p></div></div></div>
+        <div class="p-6 border-t border-white/10"><p class="text-blue-100 leading-relaxed mb-4">모든 체험존의 데이터를 종합한 AI 분석 결과를 확인하세요. 나만의 금융 성향 프로파일과 맞춤형 금융 솔루션을 제안받습니다.</p><div class="flex flex-wrap gap-2"><span class="text-xs bg-white/20 text-white px-3 py-1.5 rounded-full font-medium">AI 금융 성향 분석</span><span class="text-xs bg-white/20 text-white px-3 py-1.5 rounded-full font-medium">개인화 피드백</span><span class="text-xs bg-white/20 text-white px-3 py-1.5 rounded-full font-medium">미래 금융 로드맵</span></div></div>
+      </div>
+    </div>
+    <div class="text-center mt-14">
+      <a href="https://booking.kakao.com/detail/ticketStore/290198" target="_blank" rel="noopener noreferrer"
+         class="bg-[#003087] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#0050b3] transition-colors inline-block">
+        지금 예약하고 체험하기 →
+      </a>
+    </div>
+  </div>
+
+  <footer class="bg-[#003087] text-white py-8 mt-12">
+    <div class="max-w-5xl mx-auto px-4 text-center text-sm text-blue-200">
+      <p class="font-semibold text-white mb-1">IBK D-Park 디지털체험관</p>
+      <p>서울특별시 중구 을지로 79 IBK기업은행 본점</p>
+      <p class="mt-2">ⓒ 2026 IBK기업은행. All rights reserved.</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════ LOOKUP ═══════════════════════════════ -->
+<div id="page-lookup" class="page fade-in">
+  <div class="max-w-2xl mx-auto px-4 py-12">
+    <div class="text-center mb-10">
+      <p class="text-[#c8a96e] font-semibold text-sm uppercase tracking-widest mb-2">Reservation Lookup</p>
+      <h1 class="text-3xl font-extrabold text-[#003087]">예약 조회</h1>
+    </div>
+    <div class="flex gap-2 mb-8">
+      <input type="text" id="lookup-input" placeholder="예약번호를 입력하세요"
+             class="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm"
+             onkeydown="if(event.key==='Enter')lookupReservation()" />
+      <button onclick="lookupReservation()" class="btn-primary px-6 py-3 rounded-xl font-bold text-sm shadow-md">조회</button>
+    </div>
+    <div id="lookup-loading" class="hidden text-center py-12 text-gray-400">조회 중...</div>
+    <div id="lookup-error" class="hidden bg-red-50 border border-red-200 text-red-600 rounded-xl p-4 text-sm"></div>
+    <div id="lookup-result" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-[#003087]">예약 상세</h2>
+        <span id="lookup-status-badge" class="text-sm font-semibold px-3 py-1 rounded-full border"></span>
+      </div>
+      <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-3 shadow-sm">
+        <div class="flex justify-between py-1 border-b border-gray-50"><span class="text-sm text-gray-500">예약번호</span><span id="r-code" class="text-sm font-bold text-[#003087]"></span></div>
+        <div class="flex justify-between py-1 border-b border-gray-50"><span class="text-sm text-gray-500">예약자</span><span id="r-name" class="text-sm font-medium"></span></div>
+        <div class="flex justify-between py-1 border-b border-gray-50"><span class="text-sm text-gray-500">연락처</span><span id="r-phone" class="text-sm font-medium"></span></div>
+        <div class="flex justify-between py-1 border-b border-gray-50"><span class="text-sm text-gray-500">참여 인원</span><span id="r-party" class="text-sm font-medium"></span></div>
+        <div class="flex justify-between py-1 border-b border-gray-50"><span class="text-sm text-gray-500">체험 날짜</span><span id="r-date" class="text-sm font-medium"></span></div>
+        <div class="flex justify-between py-1"><span class="text-sm text-gray-500">체험 시간</span><span id="r-slot" class="text-sm font-medium"></span></div>
+      </div>
+      <div id="lookup-qr-section" class="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-sm">
+        <h3 class="font-bold text-[#003087] mb-4">현장 체크인 QR코드</h3>
+        <canvas id="lookup-qr-canvas" class="mx-auto"></canvas>
+        <p class="text-sm text-gray-500 mt-3">현장 키오스크에서 이 QR코드를 스캔해주세요</p>
+      </div>
+      <button id="lookup-cancel-btn" onclick="cancelLookupReservation()"
+              class="w-full border border-red-300 text-red-600 py-3 rounded-xl font-bold hover:bg-red-50 transition-colors text-sm">
+        예약 취소
+      </button>
+    </div>
+  </div>
+
+  <footer class="bg-[#003087] text-white py-8 mt-12">
+    <div class="max-w-5xl mx-auto px-4 text-center text-sm text-blue-200">
+      <p class="font-semibold text-white mb-1">IBK D-Park 디지털체험관</p>
+      <p>서울특별시 중구 을지로 79 IBK기업은행 본점</p>
+      <p class="mt-2">ⓒ 2026 IBK기업은행. All rights reserved.</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════ ADMIN ═══════════════════════════════ -->
+<div id="page-admin" class="page">
+  <!-- Login -->
+  <div id="admin-login" class="min-h-screen bg-[#003087] flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl">
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 bg-[#003087] rounded-full flex items-center justify-center mx-auto mb-3">
+          <span class="text-[#c8a96e] font-extrabold text-sm">IBK</span>
+        </div>
+        <h1 class="text-xl font-extrabold text-[#003087]">관리자 로그인</h1>
+        <p class="text-gray-400 text-sm mt-1">D-Park 운영 관리자</p>
+      </div>
+      <div class="space-y-4">
+        <input type="text" id="admin-username" placeholder="아이디"
+               class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm"
+               onkeydown="if(event.key==='Enter')adminLogin()" />
+        <input type="password" id="admin-password" placeholder="비밀번호"
+               class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm"
+               onkeydown="if(event.key==='Enter')adminLogin()" />
+        <div id="admin-login-error" class="hidden text-red-500 text-xs text-center"></div>
+        <button onclick="adminLogin()" class="w-full btn-primary py-3 rounded-xl font-bold">로그인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="admin-dashboard" class="hidden min-h-screen bg-gray-50">
+    <header class="bg-[#003087] text-white px-6 py-4 flex items-center justify-between">
+      <h1 class="font-bold text-lg">D-Park 관리자</h1>
+      <button onclick="adminLogout()" class="text-sm text-blue-200 hover:text-white transition-colors">로그아웃</button>
+    </header>
+    <div class="max-w-6xl mx-auto px-4 py-8">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-xs text-gray-500 mb-1">전체 예약</p><p id="stat-total" class="text-2xl font-extrabold text-[#003087]">0</p></div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-xs text-gray-500 mb-1">승인 대기</p><p id="stat-pending" class="text-2xl font-extrabold text-yellow-600">0</p></div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-xs text-gray-500 mb-1">예약 확정</p><p id="stat-confirmed" class="text-2xl font-extrabold text-green-600">0</p></div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100"><p class="text-xs text-gray-500 mb-1">취소</p><p id="stat-cancelled" class="text-2xl font-extrabold text-red-500">0</p></div>
+      </div>
+      <div class="flex gap-3 mb-6 flex-wrap">
+        <select id="admin-filter-status" onchange="renderAdminReservations()" class="border border-gray-300 rounded-xl px-4 py-2 text-sm bg-white">
+          <option value="">전체 상태</option>
+          <option value="pending">승인 대기</option>
+          <option value="confirmed">예약 확정</option>
+          <option value="cancelled">취소</option>
+        </select>
+        <input type="text" id="admin-filter-q" placeholder="이름·예약번호 검색"
+               oninput="renderAdminReservations()"
+               class="border border-gray-300 rounded-xl px-4 py-2 text-sm flex-1 min-w-32 bg-white" />
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-[#f8f9ff]">
+              <tr>
+                <th class="text-left px-4 py-3 font-semibold text-gray-600">예약번호</th>
+                <th class="text-left px-4 py-3 font-semibold text-gray-600">예약자</th>
+                <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">날짜·시간</th>
+                <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">인원</th>
+                <th class="text-left px-4 py-3 font-semibold text-gray-600">상태</th>
+                <th class="text-left px-4 py-3 font-semibold text-gray-600">처리</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tbody"></tbody>
+          </table>
+        </div>
+        <div id="admin-empty" class="hidden text-center py-12 text-gray-400 text-sm">예약 내역이 없습니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ═══════════════════════════════ STORAGE ═══════════════════════════════
+
+const STORAGE_KEY = 'ibkdpark_reservations';
+
+function getReservations() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+}
+function saveReservations(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+function findReservation(code) {
+  return getReservations().find(r => r.reservation_code === code.trim().toUpperCase()) || null;
+}
+function updateReservationStatus(code, status) {
+  const list = getReservations();
+  const r = list.find(x => x.reservation_code === code);
+  if (!r) throw new Error('예약을 찾을 수 없습니다.');
+  r.status = status;
+  saveReservations(list);
+  return r;
+}
+
+// ═══════════════════════════════ NAVIGATION ═══════════════════════════════
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) {
+    el.classList.add('active');
+    window.scrollTo(0, 0);
+    if (page === 'admin') initAdminPage();
+    if (page === 'lookup') initLookup();
+  }
+}
+
+// ═══════════════════════════════ LOOKUP ═══════════════════════════════
+
+let currentLookupCode = '';
+
+function initLookup() {
+  document.getElementById('lookup-result').classList.add('hidden');
+  document.getElementById('lookup-error').classList.add('hidden');
+}
+
+function lookupReservation() {
+  const code = document.getElementById('lookup-input').value.trim().toUpperCase();
+  if (!code) return;
+  currentLookupCode = code;
+  document.getElementById('lookup-loading').classList.remove('hidden');
+  document.getElementById('lookup-result').classList.add('hidden');
+  document.getElementById('lookup-error').classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('lookup-loading').classList.add('hidden');
+    const r = findReservation(code);
+    if (!r) {
+      document.getElementById('lookup-error').textContent = '예약을 찾을 수 없습니다. 예약번호를 확인해주세요.';
+      document.getElementById('lookup-error').classList.remove('hidden');
+      return;
+    }
+    showLookupResult(r);
+  }, 300);
+}
+
+const STATUS_LABELS = {
+  pending: { label: '승인 대기', cls: 'text-yellow-700 bg-yellow-50 border-yellow-200' },
+  confirmed: { label: '예약 확정', cls: 'text-green-700 bg-green-50 border-green-200' },
+  checked_in: { label: '체크인 완료', cls: 'text-blue-700 bg-blue-50 border-blue-200' },
+  completed: { label: '체험 완료', cls: 'text-purple-700 bg-purple-50 border-purple-200' },
+  cancelled: { label: '예약 취소', cls: 'text-red-700 bg-red-50 border-red-200' },
+};
+
+function showLookupResult(r) {
+  document.getElementById('r-code').textContent = r.reservation_code;
+  document.getElementById('r-name').textContent = r.user_name;
+  document.getElementById('r-phone').textContent = r.user_phone;
+  document.getElementById('r-party').textContent = `${r.participant_count}명`;
+  document.getElementById('r-date').textContent = r.date || '-';
+  document.getElementById('r-slot').textContent = r.time_slot || '-';
+
+  const s = STATUS_LABELS[r.status] || { label: r.status, cls: 'text-gray-600 bg-gray-50 border-gray-200' };
+  const badge = document.getElementById('lookup-status-badge');
+  badge.textContent = s.label;
+  badge.className = `text-sm font-semibold px-3 py-1 rounded-full border ${s.cls}`;
+
+  const qrSection = document.getElementById('lookup-qr-section');
+  const cancelBtn = document.getElementById('lookup-cancel-btn');
+
+  if (r.status === 'cancelled') {
+    qrSection.classList.add('hidden');
+    cancelBtn.classList.add('hidden');
+  } else {
+    qrSection.classList.remove('hidden');
+    cancelBtn.classList.remove('hidden');
+    const canvas = document.getElementById('lookup-qr-canvas');
+    if (typeof QRCode !== 'undefined') {
+      QRCode.toCanvas(canvas, r.reservation_code, {
+        width: 192, margin: 1, color: { dark: '#003087', light: '#ffffff' }
+      });
+    }
+  }
+  document.getElementById('lookup-result').classList.remove('hidden');
+}
+
+function cancelLookupReservation() {
+  if (!currentLookupCode) return;
+  if (!confirm('예약을 취소하시겠습니까?')) return;
+  try {
+    const r = updateReservationStatus(currentLookupCode, 'cancelled');
+    showLookupResult(r);
+  } catch (e) { alert(e.message); }
+}
+
+// ═══════════════════════════════ ADMIN ═══════════════════════════════
+
+let adminLoggedIn = false;
+
+function initAdminPage() {
+  if (adminLoggedIn) { showAdminDashboard(); }
+  else {
+    document.getElementById('admin-login').classList.remove('hidden');
+    document.getElementById('admin-dashboard').classList.add('hidden');
+  }
+}
+
+function adminLogin() {
+  const u = document.getElementById('admin-username').value.trim();
+  const p = document.getElementById('admin-password').value;
+  const errEl = document.getElementById('admin-login-error');
+  if (u === 'admin' && p === 'ibkdpark2026') {
+    adminLoggedIn = true;
+    errEl.classList.add('hidden');
+    showAdminDashboard();
+  } else {
+    errEl.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+    errEl.classList.remove('hidden');
+  }
+}
+
+function adminLogout() {
+  adminLoggedIn = false;
+  document.getElementById('admin-login').classList.remove('hidden');
+  document.getElementById('admin-dashboard').classList.add('hidden');
+  document.getElementById('admin-username').value = '';
+  document.getElementById('admin-password').value = '';
+}
+
+function showAdminDashboard() {
+  document.getElementById('admin-login').classList.add('hidden');
+  document.getElementById('admin-dashboard').classList.remove('hidden');
+  updateAdminStats();
+  renderAdminReservations();
+}
+
+function updateAdminStats() {
+  const list = getReservations();
+  document.getElementById('stat-total').textContent = list.length;
+  document.getElementById('stat-pending').textContent = list.filter(r => r.status === 'pending').length;
+  document.getElementById('stat-confirmed').textContent = list.filter(r => r.status === 'confirmed').length;
+  document.getElementById('stat-cancelled').textContent = list.filter(r => r.status === 'cancelled').length;
+}
+
+function renderAdminReservations() {
+  const statusFilter = document.getElementById('admin-filter-status').value;
+  const q = document.getElementById('admin-filter-q').value.trim().toLowerCase();
+  let list = getReservations();
+  if (statusFilter) list = list.filter(r => r.status === statusFilter);
+  if (q) list = list.filter(r =>
+    r.user_name.toLowerCase().includes(q) ||
+    r.reservation_code.toLowerCase().includes(q) ||
+    (r.user_phone || '').includes(q)
+  );
+  list.sort((a, b) => b.created_at.localeCompare(a.created_at));
+
+  const tbody = document.getElementById('admin-tbody');
+  const empty = document.getElementById('admin-empty');
+  if (list.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  tbody.innerHTML = list.map(r => {
+    const s = STATUS_LABELS[r.status] || { label: r.status, cls: 'text-gray-600 bg-gray-50 border-gray-200' };
+    const canApprove = r.status === 'pending';
+    const canReject = r.status === 'pending' || r.status === 'confirmed';
+    return `
+      <tr class="border-t border-gray-50 hover:bg-gray-50 transition-colors">
+        <td class="px-4 py-3 font-mono text-xs font-bold text-[#003087]">${r.reservation_code}</td>
+        <td class="px-4 py-3 text-sm">${r.user_name}</td>
+        <td class="px-4 py-3 text-xs text-gray-500 hidden sm:table-cell">${r.date || '-'} ${r.time_slot || ''}</td>
+        <td class="px-4 py-3 text-sm hidden sm:table-cell">${r.participant_count}명</td>
+        <td class="px-4 py-3"><span class="text-xs font-semibold px-2 py-1 rounded-full border ${s.cls}">${s.label}</span></td>
+        <td class="px-4 py-3">
+          <div class="flex gap-1">
+            ${canApprove ? `<button onclick="adminApprove('${r.reservation_code}')" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-lg hover:bg-green-200 font-medium">승인</button>` : ''}
+            ${canReject ? `<button onclick="adminReject('${r.reservation_code}')" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-lg hover:bg-red-200 font-medium">거절</button>` : ''}
+            ${!canApprove && !canReject ? '<span class="text-xs text-gray-400">-</span>' : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function adminApprove(code) {
+  try { updateReservationStatus(code, 'confirmed'); updateAdminStats(); renderAdminReservations(); }
+  catch (e) { alert(e.message); }
+}
+function adminReject(code) {
+  if (!confirm(`예약 ${code}을(를) 거절하시겠습니까?`)) return;
+  try { updateReservationStatus(code, 'cancelled'); updateAdminStats(); renderAdminReservations(); }
+  catch (e) { alert(e.message); }
+}
+
+// ═══════════════════════════════ INIT ═══════════════════════════════
+navigate('home');
+</script>
+</body>
+</html>
