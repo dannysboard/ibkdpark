@@ -16,6 +16,9 @@
     .page.active { display: block; }
     .fade-in { animation: fadeIn 0.35s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    /* Hero video */
+    #hero-video { transition: opacity 0.7s; }
+    #hero-svg  { transition: opacity 0.7s; }
 
     /* Hero SVG animations */
     @keyframes hBlink1{0%,100%{opacity:.9}48%{opacity:.9}50%{opacity:.2}52%{opacity:.9}}
@@ -41,8 +44,7 @@
     .btn-primary { background-color: #003087; color: white; transition: background-color 0.2s; }
     .btn-primary:hover:not(:disabled) { background-color: #0050b3; }
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-gold { background-color: #c8a96e; color: #003087; transition: opacity 0.2s; }
-    .btn-gold:hover { opacity: 0.9; }
+
 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -52,27 +54,30 @@
 <body class="bg-white text-gray-900 min-h-screen flex flex-col">
 
 <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
-<header class="sticky top-0 z-50 bg-[#003087] text-white shadow-md">
-  <nav class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-    <button onclick="navigate('home')" class="flex items-center gap-2">
-      <svg width="110" height="25" viewBox="0 0 110 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="IBK기업은행 로고">
-        <rect width="24" height="24" rx="3" fill="#c8a96e"/>
-        <text x="12" y="17" text-anchor="middle" fill="#003087" font-size="9" font-weight="900" font-family="Arial,sans-serif">IBK</text>
-        <text x="32" y="17" fill="white" font-size="12" font-weight="700" font-family="Arial,sans-serif">기업은행</text>
-      </svg>
-      <span class="font-bold text-lg tracking-tight">D-Park</span>
+<header class="sticky top-0 z-50 bg-[#003087] text-white shadow-lg">
+  <nav class="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between">
+    <!-- Logo -->
+    <button onclick="navigate('home')" class="flex items-center gap-3 flex-shrink-0">
+      <div class="w-11 h-11 bg-[#c8a96e] rounded-lg flex items-center justify-center flex-shrink-0">
+        <span class="text-[#003087] font-black text-sm tracking-tight">IBK</span>
+      </div>
+      <div class="flex flex-col items-start leading-tight">
+        <span class="text-white/75 font-semibold text-xs">기업은행</span>
+        <span class="text-[#c8a96e] font-extrabold text-lg tracking-tight">D-Park</span>
+      </div>
     </button>
-    <ul class="flex items-center gap-1 sm:gap-4 text-sm font-medium">
-      <li class="hidden sm:block"><button onclick="navigate('guide')" class="hover:text-[#c8a96e] transition-colors px-1">체험안내</button></li>
-      <li class="hidden sm:block"><button onclick="navigate('zones')" class="hover:text-[#c8a96e] transition-colors px-1">체험존</button></li>
+    <!-- Nav items -->
+    <ul class="flex items-center gap-6 text-base font-semibold">
+      <li class="hidden md:block"><button onclick="navigate('guide')" class="hover:text-[#c8a96e] transition-colors whitespace-nowrap">체험안내</button></li>
+      <li class="hidden md:block"><button onclick="navigate('zones')" class="hover:text-[#c8a96e] transition-colors whitespace-nowrap">체험존</button></li>
+      <li class="hidden sm:block"><button onclick="navigate('lookup')" class="hover:text-[#c8a96e] transition-colors whitespace-nowrap">예약조회</button></li>
+      <li class="hidden md:block"><button onclick="navigate('admin')" class="hover:text-[#c8a96e] transition-colors whitespace-nowrap">관리자</button></li>
       <li>
         <a href="https://booking.kakao.com/detail/ticketStore/290198" target="_blank" rel="noopener noreferrer"
-           class="btn-gold px-4 py-1.5 rounded-full font-bold hover:opacity-90 transition-opacity text-sm">
+           class="bg-[#c8a96e] text-[#003087] px-5 py-2 rounded-full font-extrabold hover:opacity-90 transition-opacity whitespace-nowrap">
           예약하기
         </a>
       </li>
-      <li><button onclick="navigate('lookup')" class="hover:text-[#c8a96e] transition-colors px-1">예약조회</button></li>
-      <li class="hidden sm:block"><button onclick="navigate('admin')" class="hover:text-[#c8a96e] transition-colors px-1">관리자</button></li>
     </ul>
   </nav>
 </header>
@@ -85,8 +90,19 @@
   <!-- Hero Section: 네오하남 2047 애니메이션 -->
   <section class="relative w-full overflow-hidden" aria-label="IBK D-Park 디지털체험관 히어로">
     <div class="relative w-full" style="padding-bottom: min(44.4%, 640px); min-height: 340px;">
-      <svg viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid slice"
-           class="absolute inset-0 w-full h-full" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <!-- Video (primary) — place hero-cinematic.mp4 in same directory as index.html -->
+      <video id="hero-video"
+             class="absolute inset-0 w-full h-full object-cover object-center opacity-0"
+             autoplay loop muted playsinline preload="auto" aria-hidden="true"
+             oncanplay="heroVideoReady()"
+             onerror="heroVideoFailed()">
+        <source src="./videos/hero-cinematic.webm" type="video/webm" />
+        <source src="./videos/hero-cinematic.mp4" type="video/mp4" />
+      </video>
+
+      <!-- SVG fallback (shown until video loads) -->
+      <svg id="hero-svg" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid slice"
+           class="absolute inset-0 w-full h-full opacity-100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="hSky" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stop-color="#000308"/>
@@ -467,29 +483,29 @@
         <rect x="0" y="0" width="1440" height="3" fill="#00CFFF" opacity="0.12" class="hScanLine" style="filter:blur(2px)"/>
       </svg>
 
-      <!-- Gradient overlay -->
-      <div class="absolute inset-0" style="background:linear-gradient(to bottom, rgba(0,20,60,0.25) 0%, rgba(0,20,60,0.08) 40%, rgba(0,15,50,0.72) 100%);" aria-hidden="true"></div>
+      <!-- Gradient overlay — darker center for text legibility -->
+      <div class="absolute inset-0" style="background:linear-gradient(to bottom, rgba(0,10,40,0.55) 0%, rgba(0,10,40,0.35) 30%, rgba(0,10,40,0.45) 70%, rgba(0,10,40,0.65) 100%);" aria-hidden="true"></div>
 
       <!-- Hero text content -->
-      <div class="absolute inset-0 flex flex-col justify-end px-5 pb-8 md:px-10 md:pb-12 lg:px-20 lg:pb-16">
-        <p class="text-xs md:text-sm font-semibold text-[#c8a96e] tracking-widest uppercase mb-2">
+      <div class="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+        <p class="text-xs md:text-sm font-semibold text-[#c8a96e] tracking-[0.2em] uppercase mb-4">
           IBK기업은행 디지털체험관
         </p>
-        <h1 class="text-2xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-3 max-w-xl lg:max-w-2xl">
-          미래 금융을 <br class="hidden sm:block" />
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.15] mb-5">
+          미래 금융을<br />
           <span class="text-[#c8a96e]">직접 체험</span>하세요
         </h1>
-        <p class="text-sm md:text-base text-white/80 mb-6 max-w-md leading-relaxed">
-          네오하남 2047에서 나만의 금융 유형을 발견하고
+        <p class="text-sm sm:text-base md:text-lg text-white/75 mb-8 max-w-md leading-[1.8]">
+          네오하남 2047에서 나만의 금융 유형을 발견하고<br class="hidden sm:block" />
           맞춤형 IBK 금융 솔루션을 경험하세요.
         </p>
-        <div class="flex flex-col sm:flex-row gap-3">
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
           <a href="https://booking.kakao.com/detail/ticketStore/290198" target="_blank" rel="noopener noreferrer"
-             class="px-7 py-3.5 rounded-2xl font-bold text-sm text-[#003087] bg-[#c8a96e] hover:opacity-90 active:scale-95 transition-all shadow-lg inline-block text-center">
+             class="px-8 py-3.5 rounded-2xl font-bold text-sm text-[#003087] bg-[#c8a96e] hover:opacity-90 active:scale-95 transition-all shadow-xl inline-block">
             지금 예약하기 →
           </a>
           <button onclick="navigate('guide')"
-             class="px-7 py-3.5 rounded-2xl font-semibold text-sm text-white/90 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 transition-all">
+             class="px-8 py-3.5 rounded-2xl font-semibold text-sm text-white/90 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 transition-all">
             체험 안내 보기
           </button>
         </div>
@@ -1080,6 +1096,24 @@ function adminReject(code) {
   try { updateReservationStatus(code, 'cancelled'); updateAdminStats(); renderAdminReservations(); }
   catch (e) { alert(e.message); }
 }
+
+// ═══════════════════════════════ HERO VIDEO ═══════════════════════════════
+
+let _videoReady = false;
+function heroVideoReady() {
+  if (_videoReady) return;
+  _videoReady = true;
+  const v = document.getElementById('hero-video');
+  const s = document.getElementById('hero-svg');
+  if (v) v.style.opacity = '1';
+  if (s) s.style.opacity = '0';
+}
+function heroVideoFailed() {
+  const v = document.getElementById('hero-video');
+  if (v) { v.style.opacity = '0'; v.style.pointerEvents = 'none'; }
+}
+// Timeout fallback: if video hasn't started in 4s, keep SVG visible
+setTimeout(() => { if (!_videoReady) heroVideoFailed(); }, 4000);
 
 // ═══════════════════════════════ INIT ═══════════════════════════════
 navigate('home');
